@@ -11,6 +11,7 @@
   <script defer src="combobox.js"></script>
   <script defer src="midi.js"></script>
   <script defer src="suggestions.js"></script>
+  <script defer src="voicing.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -58,9 +59,21 @@
       </section>
       <aside class="voicing" aria-labelledby="voicing-title">
         <div class="voicing-top"><h2 id="voicing-title">Piano voicing</h2><span id="bar"></span></div>
+        <fieldset class="voicing-modes">
+          <legend class="sr-only">Voicing style</legend>
+          <label><input type="radio" name="voicing-style" value="notes" checked><span>Full</span></label>
+          <label><input type="radio" name="voicing-style" value="shell"><span>Shell</span></label>
+          <label><input type="radio" name="voicing-style" value="rootless"><span>Rootless</span></label>
+        </fieldset>
         <p id="selected-chord"></p>
         <svg id="keyboard" role="img" viewBox="0 0 360 107" aria-label="Piano voicing"></svg>
         <p id="notes" class="notes"></p>
+        <section id="voice-leading" class="voice-leading" aria-labelledby="voice-leading-title" hidden>
+          <h3 id="voice-leading-title">Voice leading</h3>
+          <p id="voice-next"></p>
+          <ul id="voice-moves"></ul>
+          <button id="hear-both" type="button">Hear both</button>
+        </section>
         <p id="audio-status" class="audio-status" role="status"></p>
       </aside>
     </div>

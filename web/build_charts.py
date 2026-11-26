@@ -1,6 +1,7 @@
 """Build the static chart library with the Python analyzer."""
 
 import json
+from itertools import combinations, product
 from pathlib import Path
 
 from analyzer import LETTERS, MAJOR_SCALE, MINOR_SCALE, cadence_positions, parse_progression, pitch, roman_numerals
@@ -51,6 +52,48 @@ VOICINGS = {
 }
 
 
+# Pitch classes above the root. Shells retain the bass and guide tones.
+SHELL_TONES = {
+    "7": (4, 10), "m": (3, 7), "m(maj7)": (3, 11), "m7": (3, 10),
+    "m9": (3, 10), "13": (4, 10), "maj7#11": (4, 11), "maj9": (4, 11),
+    "7alt": (4, 10), "7#11": (4, 10), "m7b5": (3, 10),
+    "7b9": (4, 10), "m6": (3, 9),
+}
+ROOTLESS_TONES = {
+    "7": (4, 7, 10), "m": (3, 7), "m(maj7)": (3, 7, 11),
+    "m7": (3, 7, 10), "m9": (2, 3, 7, 10), "13": (2, 4, 9, 10),
+    "maj7#11": (4, 6, 7, 11), "maj9": (2, 4, 7, 11),
+    "7alt": (3, 4, 8, 10), "7#11": (4, 6, 7, 10),
+    "m7b5": (3, 6, 10), "7b9": (1, 4, 7, 10), "m6": (3, 7, 9),
+}
+
+
+def motion_score(previous, current):
+    common = set(previous) & set(current)
+    left = tuple(note for note in previous if note not in common)
+    right = tuple(note for note in current if note not in common)
+    if len(left) > len(right):
+        left, right = right, left
+    distance = min(sum(abs(a - b) for a, b in zip(left, subset))
+                   for subset in combinations(right, len(left)))
+    return -len(common), distance
+
+
+def choose_voicing(root, intervals, previous, floor, ceiling, center):
+    choices = [
+        [note for note in range(floor, ceiling + 1) if note % 12 == (root + interval) % 12]
+        for interval in intervals
+    ]
+    candidates = [tuple(sorted(notes)) for notes in product(*choices)]
+
+    def score(notes):
+        span = notes[-1] - notes[0]
+        return (max(0, span - 12), *motion_score(previous, notes),
+                abs(sum(notes) - center * len(notes)), span, notes)
+
+    return min(candidates, key=score)
+
+
 def degree_root(tonic, scale, degree, change):
     letter = LETTERS[(LETTERS.index(tonic[0]) + degree - 1) % 7]
     alteration = (pitch(tonic) + scale[degree - 1] + change - pitch(letter) + 6) % 12 - 6
@@ -67,10 +110,16 @@ def build_chart(tonic, mode, recipe):
         raise ValueError(f"Analyzer could not label {symbols}")
     cadences = cadence_positions(chords, labels, mode)
     bars = []
+    previous_shell = previous_rootless = ()
     for index, chord in enumerate(chords):
         root = 43 + (pitch(chord.root) - 43) % 12
+        previous_shell = choose_voicing(root, SHELL_TONES[chord.suffix], previous_shell,
+                                        max(50, root + 1), 74, 57)
+        previous_rootless = choose_voicing(root, ROOTLESS_TONES[chord.suffix], previous_rootless,
+                                            48, 74, 60)
         bars.append({"symbol": str(chord), "roman": labels[index],
-                     "notes": [root + interval for interval in VOICINGS[chord.suffix]]})
+                     "notes": [root + interval for interval in VOICINGS[chord.suffix]],
+                     "shell": (root, *previous_shell), "rootless": previous_rootless})
     return {"bars": bars, "cadences": cadences}
 
 

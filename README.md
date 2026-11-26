@@ -50,6 +50,8 @@ The analyzer uses one key for the whole progression. Minor-key numerals use the 
 
 Turnaround lets you explore preset jazz charts, hear sampled grand piano voicings, and capture chords from a MIDI keyboard. The **Next chord** section suggests continuations using the selected key and recent recorded chords. Three suggestions appear side by side, each with a harmonic reason and a piano preview. Add a suggestion to the next bar, or correct, move, and delete chords in the recorded lead sheet. The sheet is saved in your browser.
 
+**Full**, **Shell**, and **Rootless** change the piano voicing and playback on preset charts. Voice leading shows the pitches that stay, move, enter, or leave on the way to the next bar.
+
 Run the web app locally from the repository root with `python3 -m http.server --directory web/dist`, then open `http://localhost:8000`. To regenerate charts from the Python analyzer, run `python3 -m web.build_charts`.
 
 Piano playback uses Alexander Holm’s [Salamander Grand Piano](https://github.com/Tonejs/audio/tree/master/salamander) samples under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The samples and licenses are bundled in the web app.

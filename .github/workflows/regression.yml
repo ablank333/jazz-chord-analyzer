@@ -24,3 +24,5 @@ jobs:
           python3 -m web.tests.check_charts
       - name: Check next-chord rules
         run: node web/tests/check_suggestions.cjs
+      - name: Check voice leading
+        run: node web/tests/check_voicings.cjs

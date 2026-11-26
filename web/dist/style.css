@@ -174,3 +174,18 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); ou
     to { background: transparent; }
   }
 }
+
+.voicing-modes { display: flex; flex-wrap: wrap; border: 0; margin: 12px 0 0; padding: 0; gap: 4px; }
+.voicing-modes label { position: relative; cursor: pointer; }
+.voicing-modes input { position: absolute; width: 1px; height: 1px; min-height: 0; opacity: 0; }
+.voicing-modes span, #hear-both { display: inline-flex; align-items: center; min-height: 38px; padding: 0 9px; border: 1px solid var(--rule); color: var(--ink); background: transparent; font: 550 1rem/1 var(--serif); }
+.voicing-modes input:checked + span { background: var(--blue); border-color: var(--blue); color: var(--paper); }
+.voicing-modes input:focus-visible + span { outline: 3px solid var(--orange); outline-offset: 2px; }
+.white-key.common, .black-key.common { fill: var(--orange); }
+.voice-leading { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--rule); }
+.voice-leading h3 { margin: 0; font: 550 1.22rem/1.1 var(--serif); }
+#voice-next { margin-top: 4px; color: var(--blue); }
+#voice-moves { list-style: none; margin: 6px 0 8px; padding: 0; line-height: 1.35; }
+#voice-moves strong { display: inline-block; min-width: 3.1rem; }
+#hear-both { cursor: pointer; }
+#hear-both:hover { background: var(--blue-wash); }

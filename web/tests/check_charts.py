@@ -67,6 +67,11 @@ def main():
                 assert bar["notes"][0] % 12 == root % 12, (key, name, bar)
                 assert {(note - root) % 12 for note in bar["notes"]} == VOICING_CLASSES[chord.suffix], (key, name, bar)
                 assert all(21 <= note <= 108 for note in bar["notes"]), (key, name, bar)
+                shell, rootless = bar["shell"], bar["rootless"]
+                assert shell[0] == bar["notes"][0] and len(set(shell)) == len(shell) == 3
+                assert {note % 12 for note in rootless} - {root % 12} == {note % 12 for note in rootless}
+                assert shell == sorted(shell) and rootless == sorted(rootless)
+                assert all(43 <= note <= 74 for note in shell + rootless)
             if name == "minor-line":
                 top = [max(bar["notes"]) for bar in bars[:4]]
                 assert top == list(range(top[0], top[0] - 4, -1)), key

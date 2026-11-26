@@ -6,6 +6,9 @@ const playLabel = document.querySelector("#play-label");
 const chart = document.querySelector("#chart");
 const audioStatus = document.querySelector("#audio-status");
 const keyboard = document.querySelector("#keyboard");
+const voiceLeading = document.querySelector("#voice-leading");
+const voiceNext = document.querySelector("#voice-next");
+const voiceMoves = document.querySelector("#voice-moves");
 const svgNamespace = "http://www.w3.org/2000/svg";
 const blackNotes = new Set([1, 3, 6, 8, 10]);
 const sharpNames = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
@@ -18,6 +21,7 @@ let timer;
 let piano;
 let pianoReady;
 let request = 0;
+let voicingStyle = "notes";
 
 function displayAccidentals(text) {
   return text.replaceAll("bb", "𝄫").replaceAll("##", "𝄪").replaceAll("b", "♭").replaceAll("#", "♯");
@@ -58,7 +62,7 @@ function svgElement(tag, attributes) {
   return element;
 }
 
-function renderKeyboard(notes) {
+function renderKeyboard(notes, common = []) {
   const start = Math.floor(notes[0] / 12) * 12;
   const end = Math.floor(notes.at(-1) / 12) * 12 + 11;
   const whiteWidth = 359 / (((end - start + 1) / 12) * 7);
@@ -75,7 +79,8 @@ function renderKeyboard(notes) {
     const layer = black ? blackKeys : whiteKeys;
     layer.push(svgElement("rect", {
       x: left, y: 1, width, height,
-      class: (black ? "black-key" : "white-key") + (active.has(note) ? " active" : "")
+      class: (black ? "black-key" : "white-key") + (active.has(note) ? " active" : "") +
+        (common.includes(note) ? " common" : "")
     }));
     if (active.has(note)) {
       layer.push(svgElement("circle", { cx: left + width / 2, cy: height - 9, r: 2.6, class: "key-marker" }));
@@ -89,6 +94,29 @@ function currentPitchNames() {
   return keySelect.selection().value.split(":")[0].includes("b") ? flatNames : sharpNames;
 }
 
+function renderVoiceLeading(index, notes, noteName) {
+  const next = currentChart.bars[index + 1];
+  voiceLeading.hidden = !next;
+  if (!next) return [];
+  const { stay, move, leave, enter } = compareVoicings(notes, next[voicingStyle]);
+  const nextName = note => voicingNoteName(note, next.symbol);
+  voiceNext.textContent = "To bar " + (index + 2) + " · " + displayAccidentals(next.symbol);
+  const rows = [
+    ["Stay", stay.map(noteName)],
+    ["Move", move.map(([from, to]) => noteName(from) + " → " + nextName(to))],
+    ["Release", leave.map(noteName)],
+    ["Add", enter.map(nextName)]
+  ];
+  voiceMoves.replaceChildren(...rows.filter(([, pitches]) => pitches.length).map(([label, pitches]) => {
+    const item = document.createElement("li");
+    const title = document.createElement("strong");
+    title.textContent = label;
+    item.append(title, " " + pitches.join(" · "));
+    return item;
+  }));
+  return stay;
+}
+
 function showMeasure(index) {
   selected = index;
   const bar = currentChart.bars[index];
@@ -96,13 +124,15 @@ function showMeasure(index) {
     button.setAttribute("aria-pressed", String(index === position));
     button.dataset.playing = String(playing && index === position);
   });
-  const pitchNames = currentPitchNames();
-  const notes = bar.notes.map(note => pitchNames[note % 12] + (Math.floor(note / 12) - 1));
+  const noteName = note => voicingNoteName(note, bar.symbol);
+  const voicing = bar[voicingStyle];
+  const notes = voicing.map(noteName);
+  const common = renderVoiceLeading(index, voicing, noteName);
   document.querySelector("#bar").textContent = "bar " + (index + 1);
   renderChord(document.querySelector("#selected-chord"), bar.symbol);
   document.querySelector("#notes").textContent = notes.join(" · ");
   keyboard.setAttribute("aria-label", "Selected notes: " + notes.join(", "));
-  renderKeyboard(bar.notes);
+  renderKeyboard(voicing, common);
 }
 
 function updatePlayButton() {
@@ -167,7 +197,7 @@ function advance() {
   if (!playing) return;
   const duration = barDuration();
   showMeasure(selected);
-  playNotes(currentChart.bars[selected].notes, duration * 0.86);
+  playNotes(currentChart.bars[selected][voicingStyle], duration * 0.86);
   timer = setTimeout(() => {
     if (selected === currentChart.bars.length - 1) {
       stop();
@@ -219,7 +249,7 @@ function loadChart() {
     button.addEventListener("click", () => {
       stop();
       showMeasure(index);
-      enableAudio(() => playNotes(bar.notes, Math.min(1.16, barDuration() * 0.8)));
+      enableAudio(() => playNotes(bar[voicingStyle], Math.min(1.16, barDuration() * 0.8)));
     });
     return button;
   });
@@ -241,6 +271,21 @@ play.addEventListener("click", () => {
 });
 tempoInput.addEventListener("change", () => {
   tempoInput.value = Math.min(280, Math.max(40, Number(tempoInput.value) || 108));
+});
+document.querySelector(".voicing-modes").addEventListener("change", event => {
+  voicingStyle = event.target.value;
+  stop();
+});
+document.querySelector("#hear-both").addEventListener("click", () => {
+  const current = currentChart.bars[selected];
+  const next = currentChart.bars[selected + 1];
+  if (!next) return;
+  stop();
+  enableAudio(() => {
+    const duration = Math.min(1.25, barDuration() / 2);
+    playNotes(current[voicingStyle], duration * 0.9);
+    timer = setTimeout(() => playNotes(next[voicingStyle], duration * 0.9), duration * 1000);
+  });
 });
 const midiRecorder = setupMidiRecorder({
   pitchNames: currentPitchNames,
