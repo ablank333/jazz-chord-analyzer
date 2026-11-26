@@ -15,9 +15,9 @@ MINOR_SCALE = (0, 2, 3, 5, 7, 8, 10)
 ACCIDENTALS = str.maketrans({"♯": "#", "♭": "b", "𝄪": "##", "𝄫": "bb"})
 MAJOR_TRIADS = {"", "maj", "M", "Δ"}
 QUALITY_PATTERNS = (
-    ("major", re.compile(r"(?:maj|M|Δ)(?:7|9|11|13)|6")),
+    ("major", re.compile(r"(?:maj|M|Δ)(?:7|9|11|13)(?:#11)?|6")),
     ("minor", re.compile(r"(?:m|min|-)(?:6|7|9|11|13)?|m(?:Maj7|maj7|M7|\(maj7\))")),
-    ("dominant", re.compile(r"(?:7|9|11|13)(?:[b#](?:5|9|11|13))*")),
+    ("dominant", re.compile(r"(?:7|9|11|13)(?:[b#](?:5|9|11|13))*|7alt")),
     ("diminished", re.compile(r"(?:dim|°|o)7?")),
     ("half-diminished", re.compile(r"m7b5|ø7?")),
 )

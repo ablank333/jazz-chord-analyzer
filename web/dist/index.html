@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A jazz lead sheet with Roman numerals, piano voicings, and playback.">
+  <title>Jazz Lead Sheet</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="vendor/Tone.js"></script>
+  <script defer src="charts.js"></script>
+  <script defer src="combobox.js"></script>
+  <script defer src="midi.js"></script>
+  <script defer src="suggestions.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="frame masthead-inner">
+      <h1>Jazz Lead Sheet<span>.</span></h1>
+    </div>
+  </header>
+  <main class="frame">
+    <section class="controls" aria-label="Chart and playback controls">
+      <div class="combo">
+        <label for="key">Key</label>
+        <div class="combo-field">
+          <input id="key" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+                 aria-controls="key-options" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <div id="key-popup" class="combo-popup" hidden>
+            <ul id="key-options" role="listbox" aria-label="Key options"></ul>
+            <p id="key-empty" class="combo-empty" role="status" hidden>No matches</p>
+          </div>
+        </div>
+      </div>
+      <div class="combo">
+        <label for="kind">Progression</label>
+        <div class="combo-field">
+          <input id="kind" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false"
+                 aria-controls="kind-options" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <div id="kind-popup" class="combo-popup" hidden>
+            <ul id="kind-options" role="listbox" aria-label="Progression options"></ul>
+            <p id="kind-empty" class="combo-empty" role="status" hidden>No matches</p>
+          </div>
+        </div>
+      </div>
+      <label class="tempo">Tempo
+        <span class="tempo-field"><input id="tempo" type="number" min="40" max="280" value="108" step="1"><span>BPM</span></span>
+      </label>
+      <button id="play" type="button"><span class="play-mark" aria-hidden="true"></span><span id="play-label">Play</span></button>
+    </section>
+    <div class="spread">
+      <section class="chart-panel" aria-labelledby="chart-title">
+        <div class="chart-heading">
+          <h2 id="chart-title">ii–V–I</h2>
+          <p id="chart-key"></p>
+        </div>
+        <div id="chart" class="chart" aria-label="Chord chart"></div>
+        <footer class="chart-foot"><span id="cadences"></span><span>4/4</span></footer>
+      </section>
+      <aside class="voicing" aria-labelledby="voicing-title">
+        <div class="voicing-top"><h2 id="voicing-title">Piano voicing</h2><span id="bar"></span></div>
+        <p id="selected-chord"></p>
+        <svg id="keyboard" role="img" viewBox="0 0 360 107" aria-label="Piano voicing"></svg>
+        <p id="notes" class="notes"></p>
+        <p id="audio-status" class="audio-status" role="status"></p>
+      </aside>
+    </div>
+    <section class="midi-panel" aria-labelledby="midi-title">
+      <h2 id="midi-title">MIDI recording</h2>
+      <div class="midi-controls">
+        <button id="midi-record" type="button" aria-pressed="false">Record MIDI</button>
+        <label id="midi-device-label" hidden>Keyboard <select id="midi-device"></select></label>
+        <button id="midi-clear" type="button" hidden>Clear recording</button>
+      </div>
+      <p id="midi-status" role="status">Play at least three notes together to record a chord.</p>
+      <ol id="midi-chords" aria-label="Recorded chords"></ol>
+      <section id="next-chord" class="next-chord" aria-labelledby="next-chord-title" hidden>
+        <h3 id="next-chord-title">Next chord</h3>
+        <p id="next-chord-empty">No continuation matched the last chord in this key.</p>
+        <ul id="next-chord-options"></ul>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
