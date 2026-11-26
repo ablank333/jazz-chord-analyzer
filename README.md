@@ -46,6 +46,19 @@ iiø-V-i detected at position 0
 
 The analyzer uses one key for the whole progression. Minor-key numerals use the natural minor scale for degree labels, so G#dim7 in A minor is `#vii°`. Both cadence types accept a major triad or dominant chord on V. The minor cadence requires a half-diminished ii and a minor tonic.
 
+## Turnaround web app
+
+Turnaround lets you explore preset jazz charts, hear sampled grand piano voicings, and capture chords from a MIDI keyboard. The **Next chord** section suggests continuations using the selected key and recent recorded chords. Three suggestions appear side by side, each with a harmonic reason and a piano preview. Add a suggestion to the next bar, or correct, move, and delete chords in the recorded lead sheet. The sheet is saved in your browser.
+
+**Full**, **Shell**, and **Rootless** change the piano voicing and playback on preset charts. Voice leading shows the pitches that stay, move, enter, or leave on the way to the next bar.
+
+Run the web app locally from the repository root with `python3 -m http.server --directory web/dist`, then open `http://localhost:8000`. To regenerate charts from the Python analyzer, run `python3 -m web.build_charts`.
+
+Piano playback uses Alexander Holm’s [Salamander Grand Piano](https://github.com/Tonejs/audio/tree/master/salamander) samples under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The samples and licenses are bundled in the web app.
+
 ## Regression checks
 
 Run `python3 tests/cli_regression.py -v` with Python 3.9 or later. GitHub Actions runs the same suite on pull requests and pushes to `main`.
+
+
+Run `python3 -m web.tests.check_charts` and `node web/tests/check_suggestions.cjs` to verify the web app’s presets and next-chord rules.

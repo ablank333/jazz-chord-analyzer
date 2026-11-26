@@ -17,3 +17,12 @@ jobs:
           persist-credentials: false
       - name: Run CLI regression checks
         run: python3 -X utf8 tests/cli_regression.py -v
+      - name: Check the preset charts
+        run: |
+          python3 -m web.build_charts
+          git diff --exit-code -- web/dist/charts.js
+          python3 -m web.tests.check_charts
+      - name: Check next-chord rules
+        run: node web/tests/check_suggestions.cjs
+      - name: Check voice leading
+        run: node web/tests/check_voicings.cjs
