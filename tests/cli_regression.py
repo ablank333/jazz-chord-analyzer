@@ -1,6 +1,6 @@
 import re
 import subprocess
-import tempfile
+import sys
 import unittest
 from pathlib import Path
 
@@ -9,20 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CliRegressionTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        build = tempfile.TemporaryDirectory()
-        cls.addClassCleanup(build.cleanup)
-        cls.classes = build.name
-        subprocess.run(
-            ["javac", "--release", "11", "-Xlint:all", "-encoding", "UTF-8",
-             "-d", cls.classes, *sorted(ROOT.glob("*.java"))],
-            check=True,
-        )
-
     def run_cli(self, chords, *args):
         return subprocess.run(
-            ["java", "-Dfile.encoding=UTF-8", "-cp", self.classes, "Main", *args],
+            [sys.executable, "-X", "utf8", ROOT / "analyzer.py", *args],
             input=chords, encoding="utf-8", capture_output=True, timeout=10,
         )
 
@@ -71,7 +60,7 @@ class CliRegressionTests(unittest.TestCase):
             ("Qm7 G7 C\n", (), "Invalid chord symbol"),
             ("Dm7 G7 C\n", ("H",), "Invalid major key: H."),
             ("Bm7b5 E7 Am\n", ("H", "minor"), "Invalid minor key: H."),
-            ("Dm7 G7 C\n", ("C", "dorian"), "Usage: java Main"),
+            ("Dm7 G7 C\n", ("C", "dorian"), "Usage: python3 analyzer.py"),
         ]
         for chords, args, error in cases:
             with self.subTest(chords=chords, args=args):

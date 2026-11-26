@@ -1,20 +1,19 @@
 # Jazz Chord Progression Analyzer
 
-A Java command-line tool that labels chord progressions with Roman numerals in a supplied key. It detects ii–V–I in major keys and iiø–V–i in minor keys.
+A Python command-line tool that labels chord progressions with Roman numerals in a supplied key. It detects ii–V–I in major keys and iiø–V–i in minor keys.
 
 ## Run
 
-From the repository root with JDK 11 or later, compile and run:
+From the repository root with Python 3.9 or later, run:
 
 ```sh
-javac -encoding UTF-8 *.java
-java Main
+python3 analyzer.py
 ```
 
 The default key is C major. Pass a tonic such as `Bb` or `F#` to analyze in another major key:
 
 ```sh
-printf 'Cm7 → F7 → Bbmaj7\n' | java Main Bb
+printf 'Cm7 → F7 → Bbmaj7\n' | python3 analyzer.py Bb
 ```
 
 ```text
@@ -32,7 +31,7 @@ Separate chords with spaces, tabs, `→`, or `->`. The analyzer recognizes commo
 Pass the tonic followed by `minor`:
 
 ```sh
-printf 'Bm7b5 → E7b9 → Am7\n' | java Main A minor
+printf 'Bm7b5 → E7b9 → Am7\n' | python3 analyzer.py A minor
 ```
 
 ```text
@@ -45,4 +44,4 @@ The analyzer uses one key for the whole progression. Minor-key numerals use the 
 
 ## Regression checks
 
-Run `python3 tests/cli_regression.py -v` with JDK 11 or later and Python 3. GitHub Actions runs the same suite on pull requests and pushes to `main`.
+Run `python3 tests/cli_regression.py -v` with Python 3.9 or later. GitHub Actions runs the same suite on pull requests and pushes to `main`.
