@@ -80,6 +80,41 @@ class CliRegressionTests(unittest.TestCase):
                 self.assertIn(error, result.stderr)
                 self.assertNotIn("Exception", result.stderr)
 
+    def test_all_standard_keys(self):
+        cases = {
+            "major": [
+                ("Cb", "Db", "Gb"), ("Gb", "Ab", "Db"), ("Db", "Eb", "Ab"),
+                ("Ab", "Bb", "Eb"), ("Eb", "F", "Bb"), ("Bb", "C", "F"),
+                ("F", "G", "C"), ("C", "D", "G"), ("G", "A", "D"),
+                ("D", "E", "A"), ("A", "B", "E"), ("E", "F#", "B"),
+                ("B", "C#", "F#"), ("F#", "G#", "C#"), ("C#", "D#", "G#"),
+            ],
+            "minor": [
+                ("Ab", "Bb", "Eb"), ("Eb", "F", "Bb"), ("Bb", "C", "F"),
+                ("F", "G", "C"), ("C", "D", "G"), ("G", "A", "D"),
+                ("D", "E", "A"), ("A", "B", "E"), ("E", "F#", "B"),
+                ("B", "C#", "F#"), ("F#", "G#", "C#"), ("C#", "D#", "G#"),
+                ("G#", "A#", "D#"), ("D#", "E#", "A#"), ("A#", "B#", "E#"),
+            ],
+        }
+        for mode, keys in cases.items():
+            for tonic, second, fifth in keys:
+                with self.subTest(tonic=tonic, mode=mode):
+                    if mode == "major":
+                        self.assert_analysis(f"{second}m7 {fifth}7 {tonic}maj7",
+                                             (tonic, mode), "ii V I", [("ii-V-I", 0)])
+                    else:
+                        self.assert_analysis(f"{second}m7b5 {fifth}7 {tonic}m7",
+                                             (tonic, mode), "iiø V i", [("iiø-V-i", 0)])
+
+    def test_accidental_spellings(self):
+        self.assert_analysis("G##dim7 G𝄪dim7 B♯ø7 E♯7 A♯m", ("A♯", "minor"),
+                             "#vii° #vii° iiø V i", [("iiø-V-i", 2)])
+        self.assert_analysis("Bbbmaj7 B𝄫maj7 D♭m7 G♭7 C♭maj7", ("C♭", "major"),
+                             "bVII bVII ii V I", [("ii-V-I", 2)])
+        self.assert_analysis("A##m7 D##7 G##maj7", ("G𝄪", "major"),
+                             "ii V I", [("ii-V-I", 0)])
+
     def test_end_of_input(self):
         result = self.run_cli("")
         self.assertEqual(result.returncode, 0, result)

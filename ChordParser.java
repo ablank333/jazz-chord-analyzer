@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChordParser {
-    private static final Pattern SYMBOL = Pattern.compile("([A-G][b#]?)(.*)");
+    private static final Pattern SYMBOL = Pattern.compile("(" + Chord.ROOT_PATTERN + ")(.*)");
 
     public List<Chord> parse(String chordsInput) {
         String input = chordsInput.strip();

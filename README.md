@@ -23,7 +23,9 @@ Roman numerals: ii V I
 ii-V-I detected at position 0
 ```
 
-Separate chords with spaces, tabs, `→`, or `->`. Use uppercase roots with optional ASCII `b` or `#`. The analyzer recognizes common major, minor, dominant, diminished, and half-diminished symbols, such as `Cmaj7`, `Cm9`, `C7b9`, `Cdim7`, and `Cm7b5`. Unsupported chord qualities display as `?`. Cadence positions are zero-based and mark the starting chord.
+All 15 standard major-key spellings and all 15 standard minor-key spellings are supported, including enharmonic pairs such as C-flat and B major. Enter roots and tonics as uppercase letters with optional accidentals. ASCII `b`, `#`, `bb`, and `##` and musical symbols `♭`, `♯`, `𝄫`, and `𝄪` are accepted.
+
+Separate chords with spaces, tabs, `→`, or `->`. The analyzer recognizes common major, minor, dominant, diminished, and half-diminished symbols, such as `Cmaj7`, `Cm9`, `C7b9`, `Cdim7`, and `Cm7b5`. Unsupported chord qualities display as `?`. Cadence positions are zero-based and mark the starting chord.
 
 ## Minor keys
 

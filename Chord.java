@@ -1,6 +1,8 @@
 import java.util.regex.Pattern;
 
 public class Chord {
+    static final String ROOT_PATTERN = "[A-G](?:[b♭]{1,2}|[#♯]{1,2}|𝄫|𝄪)?";
+
     enum Quality {
         MAJOR, MINOR, DOMINANT, DIMINISHED, HALF_DIMINISHED, UNKNOWN
     }

@@ -19,7 +19,7 @@ public class RomanNumeralMapper {
     }
 
     public RomanNumeralMapper(String tonic, boolean minor) {
-        if (!tonic.matches("[A-G][b#]?")) {
+        if (!tonic.matches(Chord.ROOT_PATTERN)) {
             String mode = minor ? "minor" : "major";
             throw new IllegalArgumentException("Invalid " + mode + " key: " + tonic + ".");
         }
@@ -30,7 +30,7 @@ public class RomanNumeralMapper {
 
     public String map(Chord chord) {
         String root = chord.getRoot();
-        if (!root.matches("[A-G][b#]?")) {
+        if (!root.matches(Chord.ROOT_PATTERN)) {
             return "?";
         }
         int letter = LETTERS.indexOf(root.charAt(0));
@@ -56,11 +56,14 @@ public class RomanNumeralMapper {
     }
 
     private static int pitch(String note, int letter) {
-        int pitch = MAJOR_SCALE[letter];
-        if (note.length() == 2) {
-            pitch += note.charAt(1) == '#' ? 1 : -1;
+        int naturalPitch = MAJOR_SCALE[letter];
+        String accidental = note.substring(1)
+                .replace("♯", "#").replace("♭", "b")
+                .replace("𝄪", "##").replace("𝄫", "bb");
+        if (accidental.startsWith("#")) {
+            return naturalPitch + accidental.length();
         }
-        return pitch;
+        return naturalPitch - accidental.length();
     }
 
     public static void main(String[] args) {
