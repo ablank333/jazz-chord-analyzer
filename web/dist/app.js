@@ -62,7 +62,7 @@ function svgElement(tag, attributes) {
   return element;
 }
 
-function renderKeyboard(notes, common = []) {
+function renderKeyboard(notes) {
   const start = Math.floor(notes[0] / 12) * 12;
   const end = Math.floor(notes.at(-1) / 12) * 12 + 11;
   const whiteWidth = 359 / (((end - start + 1) / 12) * 7);
@@ -79,8 +79,7 @@ function renderKeyboard(notes, common = []) {
     const layer = black ? blackKeys : whiteKeys;
     layer.push(svgElement("rect", {
       x: left, y: 1, width, height,
-      class: (black ? "black-key" : "white-key") + (active.has(note) ? " active" : "") +
-        (common.includes(note) ? " common" : "")
+      class: (black ? "black-key" : "white-key") + (active.has(note) ? " active" : "")
     }));
     if (active.has(note)) {
       layer.push(svgElement("circle", { cx: left + width / 2, cy: height - 9, r: 2.6, class: "key-marker" }));
@@ -97,7 +96,7 @@ function currentPitchNames() {
 function renderVoiceLeading(index, notes, noteName) {
   const next = currentChart.bars[index + 1];
   voiceLeading.hidden = !next;
-  if (!next) return [];
+  if (!next) return;
   const { stay, move, leave, enter } = compareVoicings(notes, next[voicingStyle]);
   const nextName = note => voicingNoteName(note, next.symbol);
   voiceNext.textContent = "To bar " + (index + 2) + " · " + displayAccidentals(next.symbol);
@@ -114,7 +113,6 @@ function renderVoiceLeading(index, notes, noteName) {
     item.append(title, " " + pitches.join(" · "));
     return item;
   }));
-  return stay;
 }
 
 function showMeasure(index) {
@@ -127,12 +125,12 @@ function showMeasure(index) {
   const noteName = note => voicingNoteName(note, bar.symbol);
   const voicing = bar[voicingStyle];
   const notes = voicing.map(noteName);
-  const common = renderVoiceLeading(index, voicing, noteName);
+  renderVoiceLeading(index, voicing, noteName);
   document.querySelector("#bar").textContent = "bar " + (index + 1);
   renderChord(document.querySelector("#selected-chord"), bar.symbol);
   document.querySelector("#notes").textContent = notes.join(" · ");
   keyboard.setAttribute("aria-label", "Selected notes: " + notes.join(", "));
-  renderKeyboard(voicing, common);
+  renderKeyboard(voicing);
 }
 
 function updatePlayButton() {

@@ -181,7 +181,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); ou
 .voicing-modes span, #hear-both { display: inline-flex; align-items: center; min-height: 38px; padding: 0 9px; border: 1px solid var(--rule); color: var(--ink); background: transparent; font: 550 1rem/1 var(--serif); }
 .voicing-modes input:checked + span { background: var(--blue); border-color: var(--blue); color: var(--paper); }
 .voicing-modes input:focus-visible + span { outline: 3px solid var(--orange); outline-offset: 2px; }
-.white-key.common, .black-key.common { fill: var(--orange); }
 .voice-leading { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--rule); }
 .voice-leading h3 { margin: 0; font: 550 1.22rem/1.1 var(--serif); }
 #voice-next { margin-top: 4px; color: var(--blue); }
