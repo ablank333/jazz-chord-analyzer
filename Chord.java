@@ -8,6 +8,7 @@ public class Chord {
     private static final Pattern MAJOR_TRIAD = Pattern.compile("maj|M|Δ|");
     private static final Pattern MAJOR = Pattern.compile("(?:maj|M|Δ)(?:7|9|11|13)|6");
     private static final Pattern MINOR = Pattern.compile("(?:m|min|-)(?:6|7|9|11|13)?");
+    private static final Pattern MINOR_MAJOR_SEVENTH = Pattern.compile("m(?:Maj7|maj7|M7|\\(maj7\\))");
     private static final Pattern DOMINANT = Pattern.compile("(?:7|9|11|13)(?:[b#](?:5|9|11|13))*");
     private static final Pattern DIMINISHED = Pattern.compile("(?:dim|°|o)7?");
     private final String root; // root of chord
@@ -36,7 +37,7 @@ public class Chord {
         if (isMajorTriad() || MAJOR.matcher(suffix).matches()) {
             return Quality.MAJOR;
         }
-        if (MINOR.matcher(suffix).matches()) {
+        if (MINOR.matcher(suffix).matches() || MINOR_MAJOR_SEVENTH.matcher(suffix).matches()) {
             return Quality.MINOR;
         }
         if (DOMINANT.matcher(suffix).matches()) {

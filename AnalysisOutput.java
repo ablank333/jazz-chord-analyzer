@@ -7,9 +7,13 @@ public class AnalysisOutput {
     }
 
     public void analyze(String input, String tonic) {
+        analyze(input, tonic, false);
+    }
+
+    public void analyze(String input, String tonic, boolean minor) {
         ChordParser parser = new ChordParser();
         List<Chord> chords = parser.parse(input);
-        RomanNumeralMapper mapper = new RomanNumeralMapper(tonic);
+        RomanNumeralMapper mapper = new RomanNumeralMapper(tonic, minor);
         List<String> romanNumerals = new ArrayList<>();
 
         System.out.print("Chords:");
@@ -21,8 +25,9 @@ public class AnalysisOutput {
         System.out.println("Roman numerals: " + String.join(" ", romanNumerals));
 
         PatternDetector detector = new PatternDetector();
-        for (int position : detector.detect(romanNumerals, chords)) {
-            System.out.println("ii-V-I detected at position " + position);
+        String cadence = minor ? "iiø-V-i" : "ii-V-I";
+        for (int position : detector.detect(romanNumerals, chords, minor)) {
+            System.out.println(cadence + " detected at position " + position);
         }
         System.out.println();
     }

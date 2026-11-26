@@ -4,7 +4,9 @@ public class RomanNumeralMapper {
     private static final String LETTERS = "CDEFGAB";
     private static final String[] DEGREES = {"I", "II", "III", "IV", "V", "VI", "VII"};
     private static final int[] MAJOR_SCALE = {0, 2, 4, 5, 7, 9, 11};
+    private static final int[] NATURAL_MINOR_SCALE = {0, 2, 3, 5, 7, 8, 10};
 
+    private final int[] scale;
     private final int tonicLetter;
     private final int tonicPitch;
 
@@ -13,9 +15,15 @@ public class RomanNumeralMapper {
     }
 
     public RomanNumeralMapper(String tonic) {
+        this(tonic, false);
+    }
+
+    public RomanNumeralMapper(String tonic, boolean minor) {
         if (!tonic.matches("[A-G][b#]?")) {
-            throw new IllegalArgumentException("Invalid major key: " + tonic + ".");
+            String mode = minor ? "minor" : "major";
+            throw new IllegalArgumentException("Invalid " + mode + " key: " + tonic + ".");
         }
+        scale = minor ? NATURAL_MINOR_SCALE : MAJOR_SCALE;
         tonicLetter = LETTERS.indexOf(tonic.charAt(0));
         tonicPitch = pitch(tonic, tonicLetter);
     }
@@ -27,7 +35,7 @@ public class RomanNumeralMapper {
         }
         int letter = LETTERS.indexOf(root.charAt(0));
         int degree = Math.floorMod(letter - tonicLetter, DEGREES.length);
-        int expectedPitch = tonicPitch + MAJOR_SCALE[degree];
+        int expectedPitch = tonicPitch + scale[degree];
         int alteration = Math.floorMod(pitch(root, letter) - expectedPitch + 6, 12) - 6;
         String accidental = alteration < 0 ? "b".repeat(-alteration) : "#".repeat(alteration);
         String numeral = DEGREES[degree];
