@@ -72,12 +72,31 @@
         <button id="midi-clear" type="button" hidden>Clear recording</button>
       </div>
       <p id="midi-status" role="status">Play at least three notes together to record a chord.</p>
-      <ol id="midi-chords" aria-label="Recorded chords"></ol>
       <section id="next-chord" class="next-chord" aria-labelledby="next-chord-title" hidden>
         <h3 id="next-chord-title">Next chord</h3>
         <p id="next-chord-empty">No continuation matched the last chord in this key.</p>
         <ul id="next-chord-options"></ul>
       </section>
+      <section id="recorded-sheet" aria-labelledby="recorded-sheet-title" hidden>
+        <h3 id="recorded-sheet-title">Recorded lead sheet</h3>
+        <div id="midi-chords" class="chart" aria-label="Recorded chord bars"></div>
+        <form id="recorded-editor" class="recorded-editor">
+          <div class="recorded-label">
+            <label for="recorded-label">Chord label</label>
+            <div>
+              <input id="recorded-label" type="text" maxlength="24" autocomplete="off" spellcheck="false">
+              <button type="submit">Save label</button>
+            </div>
+          </div>
+          <div class="recorded-actions">
+            <button id="recorded-earlier" type="button">Move earlier</button>
+            <button id="recorded-later" type="button">Move later</button>
+            <button id="recorded-delete" type="button">Delete bar</button>
+          </div>
+          <p id="recorded-notes"></p>
+        </form>
+      </section>
+      <p id="recorded-update" class="sr-only" role="status"></p>
     </section>
   </main>
 </body>

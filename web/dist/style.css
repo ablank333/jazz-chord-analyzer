@@ -132,18 +132,45 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--orange); ou
 .midi-panel { border-top: 2px solid var(--ink); padding-block: 22px 44px; }
 .midi-panel h2 { font: 550 1.78rem/1 var(--serif); letter-spacing: -.025em; }
 .midi-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-block: 12px 10px; }
-.midi-panel button, #midi-device { font: 550 1rem/1 var(--serif); color: var(--ink); background: transparent; border: 1px solid var(--ink); min-height: 40px; padding: 0 11px; border-radius: 0; }
+.midi-controls button, .recorded-editor button, #next-chord-options button, #midi-device { font: 550 1rem/1 var(--serif); color: var(--ink); background: transparent; border: 1px solid var(--ink); min-height: 40px; padding: 0 11px; border-radius: 0; }
 .midi-panel button { cursor: pointer; }
 #midi-record { background: var(--ink); color: var(--paper); }
 #midi-record[aria-pressed="true"] { background: var(--blue); }
-.midi-panel button:disabled { opacity: .6; cursor: wait; }
+.midi-panel button:disabled { opacity: .6; cursor: default; }
+#midi-record:disabled { cursor: wait; }
 #midi-status { color: var(--blue); }
-#midi-chords { margin-block: 12px 0; padding-inline-start: 23px; }
-#midi-chords li { padding-block: 4px; }
-#midi-chords li span { display: inline-block; padding: 8px 12px; }
+#recorded-sheet { margin-top: 18px; }
+#recorded-sheet h3 { margin: 0 0 10px; font: 550 1.38rem/1.1 var(--serif); }
+#midi-chords .measure { min-height: 96px; min-width: 0; }
+#midi-chords .measure:nth-last-child(-n + 4) { border-bottom-width: 1px; }
+#midi-chords .symbol sup { white-space: normal; overflow-wrap: anywhere; }
+.recorded-unknown { font-size: .875rem; overflow-wrap: anywhere; }
+.recorded-editor { display: flex; flex-wrap: wrap; align-items: end; gap: 10px 15px; margin-top: 12px; }
+.recorded-label { display: grid; gap: 5px; }
+.recorded-label > div, .recorded-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+#recorded-label { width: 8rem; min-height: 40px; padding-inline: 8px; }
+#recorded-notes { flex-basis: 100%; color: var(--blue); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .next-chord { border-top: 1px solid var(--rule); margin-top: 18px; padding-top: 14px; }
 .next-chord h3 { margin: 0 0 6px; font: 550 1.38rem/1.1 var(--serif); }
 #next-chord-options { margin: 0; padding: 0; list-style: none; }
-#next-chord-options li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding-block: 4px; }
-#next-chord-options li span { line-height: 1.35; }
+
+#next-chord-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+#next-chord-options li { display: grid; grid-template-rows: auto 1fr auto; align-items: start; gap: 8px; padding: 10px; min-width: 0; border: 1px solid var(--rule); }
+#next-chord-options h4 { margin: 0; font: 400 clamp(1.35rem, 4vw, 2rem)/1.1 var(--chord); overflow-wrap: anywhere; }
+#next-chord-options p { font-size: .95rem; line-height: 1.25; }
+.suggestion-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+#next-chord-options button { padding-inline: 7px; }
+@media (max-width: 540px) {
+  #next-chord-options { gap: 5px; }
+  #next-chord-options li { padding: 6px; }
+  #next-chord-options p { font-size: .875rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  #next-chord-options li { animation: suggestion-update .55s ease-out; }
+  @keyframes suggestion-update {
+    from { background: var(--orange-wash); }
+    to { background: transparent; }
+  }
+}

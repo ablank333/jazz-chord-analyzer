@@ -24,7 +24,7 @@ function displayAccidentals(text) {
 }
 
 function renderChord(element, chord) {
-  const [, root, ending] = chord.match(/^([A-G][b#]*)(.*)$/u);
+  const [, root, ending] = chord.match(/^([A-G](?:[b♭]{1,2}|[#♯]{1,2}|𝄫|𝄪)?)(.*)$/u);
   const rootText = document.createElement("span");
   const suffix = document.createElement("sup");
   rootText.textContent = displayAccidentals(root);
@@ -244,7 +244,8 @@ tempoInput.addEventListener("change", () => {
 });
 const midiRecorder = setupMidiRecorder({
   pitchNames: currentPitchNames,
-  suggest: chords => suggestNextChords(chords, keySelect.selection().value),
+  renderChord,
+  suggest: bars => suggestNextChords(bars.map(bar => bar.notes), keySelect.selection().value, bars.map(bar => bar.label)),
   audition: notes => {
     stop();
     enableAudio(() => playNotes(notes, Math.min(1.16, barDuration() * 0.8)));

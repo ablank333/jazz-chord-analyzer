@@ -56,11 +56,33 @@ function createMidiCapture(onChord, schedule = setTimeout, cancel = clearTimeout
   return { receive, flush };
 }
 
-function setupMidiRecorder({ pitchNames, suggest, audition }) {
+const RECORDED_LABEL = /^[A-G](?:[b♭]{1,2}|[#♯]{1,2}|𝄫|𝄪)?[A-Za-z0-9+#♭♯ø°Δ()\/-]*$/u;
+
+function readRecordedBars(saved) {
+  if (!Array.isArray(saved)) return [];
+  return saved.flatMap(entry => {
+    const bar = Array.isArray(entry) ? { notes: entry } : entry;
+    if (!Array.isArray(bar?.notes) || bar.notes.length < 3 ||
+        !bar.notes.every(note => Number.isInteger(note) && note >= 0 && note <= 127)) return [];
+    const label = typeof bar.label === "string" && bar.label.length <= 24 && RECORDED_LABEL.test(bar.label)
+      ? bar.label : "";
+    return [{ notes: bar.notes, label }];
+  });
+}
+
+function setupMidiRecorder({ pitchNames, renderChord, suggest, audition }) {
   const button = document.querySelector("#midi-record");
   const device = document.querySelector("#midi-device");
   const deviceLabel = document.querySelector("#midi-device-label");
   const list = document.querySelector("#midi-chords");
+  const sheet = document.querySelector("#recorded-sheet");
+  const editor = document.querySelector("#recorded-editor");
+  const labelInput = document.querySelector("#recorded-label");
+  const earlier = document.querySelector("#recorded-earlier");
+  const later = document.querySelector("#recorded-later");
+  const remove = document.querySelector("#recorded-delete");
+  const notesLabel = document.querySelector("#recorded-notes");
+  const update = document.querySelector("#recorded-update");
   const clear = document.querySelector("#midi-clear");
   const status = document.querySelector("#midi-status");
   const suggestions = document.querySelector("#next-chord");
@@ -70,65 +92,146 @@ function setupMidiRecorder({ pitchNames, suggest, audition }) {
   let access;
   let input;
   let recording = false;
-  let chords = [];
+  let bars = [];
+  let selectedBar = 0;
+  let previousSuggestions = "";
 
   try {
-    const saved = JSON.parse(localStorage.getItem(storageKey));
-    if (Array.isArray(saved)) {
-      chords = saved.filter(notes => Array.isArray(notes) && notes.length >= 3 &&
-        notes.every(note => Number.isInteger(note) && note >= 0 && note <= 127));
-    }
+    bars = readRecordedBars(JSON.parse(localStorage.getItem(storageKey)));
   } catch {
     // Recording still works with storage disabled.
   }
 
   function save() {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(chords));
+      localStorage.setItem(storageKey, JSON.stringify(bars));
     } catch {
       // Keep the current session usable when storage is unavailable.
     }
   }
 
-  function render() {
+  function renderEditor(bar, labels, names) {
+    labelInput.value = bar.label;
+    labelInput.placeholder = labels[0] || "e.g. Dm7";
+    labelInput.setCustomValidity("");
+    earlier.disabled = selectedBar === 0;
+    later.disabled = selectedBar === bars.length - 1;
+    const pitches = bar.notes.map(note => names[note % 12] + (Math.floor(note / 12) - 1));
+    const alternatives = labels.filter(label => label !== (bar.label || labels[0]));
+    notesLabel.textContent = pitches.join(" · ") +
+      (alternatives.length ? " / Also " + alternatives.join(", ") : "");
+  }
+
+  function renderBar(bar, index, names) {
+    const [inferred] = labelMidiChord(bar.notes, names);
+    const label = bar.label || inferred;
+    const cell = document.createElement("button");
+    const number = document.createElement("span");
+    const symbol = document.createElement("span");
+    cell.type = "button";
+    cell.className = "measure";
+    cell.setAttribute("aria-pressed", String(index === selectedBar));
+    cell.setAttribute("aria-label", "Recorded bar " + (index + 1) + ": " + (label || "Unidentified chord"));
+    number.className = "measure-number";
+    number.textContent = index + 1;
+    symbol.className = label ? "symbol" : "recorded-unknown";
+    if (label) renderChord(symbol, label);
+    else symbol.textContent = "Unknown";
+    cell.append(number, symbol);
+    cell.addEventListener("click", () => {
+      selectedBar = index;
+      render();
+      list.children[index].focus();
+      audition(bar.notes);
+    });
+    return cell;
+  }
+
+  function commit(message, focusBar = false) {
+    save();
+    render();
+    update.textContent = message;
+    if (focusBar) (list.children[selectedBar] || button).focus();
+  }
+
+  function render(preserveLabel = false) {
     const names = pitchNames();
-    list.replaceChildren(...chords.map((notes, index) => {
-      const [label = "Unidentified chord", ...alternatives] = labelMidiChord(notes, names);
-      const row = document.createElement("li");
-      const playChord = document.createElement("button");
-      const details = document.createElement("span");
-      playChord.type = "button";
-      playChord.textContent = label;
-      playChord.setAttribute("aria-label", "Replay chord " + (index + 1) + " · " + label);
-      playChord.addEventListener("click", () => audition(notes));
-      const pitches = notes.map(note => names[note % 12] + (Math.floor(note / 12) - 1));
-      details.textContent = pitches.join(" · ") +
-        (alternatives.length ? " / Also " + alternatives.join(", ") : "");
-      row.append(playChord, details);
-      return row;
-    }));
-    clear.hidden = chords.length === 0;
-    const nextChords = suggest(chords);
-    suggestions.hidden = chords.length === 0;
+    sheet.hidden = bars.length === 0;
+    list.replaceChildren(...bars.map((bar, index) => renderBar(bar, index, names)));
+    if (bars.length && !preserveLabel) {
+      const bar = bars[selectedBar];
+      renderEditor(bar, labelMidiChord(bar.notes, names), names);
+    }
+    if (preserveLabel) later.disabled = selectedBar === bars.length - 1;
+    clear.hidden = bars.length === 0;
+    const nextChords = suggest(bars);
+    suggestions.hidden = bars.length === 0;
     noChoices.hidden = nextChords.length > 0;
+    const signature = nextChords.map(({ name, reason }) => name + reason).join("|");
+    if (signature === previousSuggestions) return;
+    previousSuggestions = signature;
     choices.replaceChildren(...nextChords.map(({ name, reason, notes }) => {
       const row = document.createElement("li");
-      const button = document.createElement("button");
-      const explanation = document.createElement("span");
-      button.type = "button";
-      button.textContent = "Hear " + name;
-      button.addEventListener("click", () => audition(notes));
+      const title = document.createElement("h4");
+      const actions = document.createElement("div");
+      const hear = document.createElement("button");
+      const add = document.createElement("button");
+      const explanation = document.createElement("p");
+      title.textContent = name;
+      hear.type = add.type = "button";
+      hear.textContent = "Hear";
+      add.textContent = "Add";
+      hear.setAttribute("aria-label", "Hear " + name);
+      add.setAttribute("aria-label", "Add " + name);
+      hear.addEventListener("click", () => audition(notes));
+      add.addEventListener("click", () => {
+        selectedBar = bars.length;
+        bars.push({ notes, label: name });
+        commit("Added " + name + " to bar " + (selectedBar + 1) + ".", true);
+      });
       explanation.textContent = reason;
-      row.append(button, explanation);
+      actions.className = "suggestion-actions";
+      actions.append(hear, add);
+      row.append(title, explanation, actions);
       return row;
     }));
   }
 
+  labelInput.addEventListener("input", () => labelInput.setCustomValidity(""));
+  editor.addEventListener("submit", event => {
+    event.preventDefault();
+    const label = labelInput.value.trim().replace(/^[a-g]/, root => root.toUpperCase());
+    if (label && !RECORDED_LABEL.test(label)) {
+      labelInput.setCustomValidity("Enter a chord symbol such as Dm7 or B♭7.");
+      labelInput.reportValidity();
+      return;
+    }
+    bars[selectedBar].label = label;
+    commit(label ? "Saved " + label + "." : "Restored the recognized label.", true);
+  });
+
+  function moveBar(step) {
+    const destination = selectedBar + step;
+    if (destination < 0 || destination >= bars.length) return;
+    [bars[selectedBar], bars[destination]] = [bars[destination], bars[selectedBar]];
+    selectedBar = destination;
+    commit("Moved chord to bar " + (selectedBar + 1) + ".", true);
+  }
+
+  earlier.addEventListener("click", () => moveBar(-1));
+  later.addEventListener("click", () => moveBar(1));
+  remove.addEventListener("click", () => {
+    const deleted = selectedBar + 1;
+    bars.splice(selectedBar, 1);
+    selectedBar = Math.max(0, Math.min(selectedBar, bars.length - 1));
+    commit("Deleted bar " + deleted + ".", true);
+  });
+
   const capture = createMidiCapture(notes => {
-    chords.push(notes);
+    bars.push({ notes, label: "" });
     save();
-    render();
-    status.textContent = "Recording · " + chords.length + (chords.length === 1 ? " chord" : " chords");
+    render(document.activeElement === labelInput);
+    status.textContent = "Recording · " + bars.length + (bars.length === 1 ? " chord" : " chords");
   });
 
   function stopRecording() {
@@ -138,7 +241,8 @@ function setupMidiRecorder({ pitchNames, suggest, audition }) {
     button.textContent = "Record MIDI";
     button.setAttribute("aria-pressed", "false");
     device.disabled = false;
-    status.textContent = chords.length ? chords.length + (chords.length === 1 ? " chord recorded." : " chords recorded.") : "No chords recorded.";
+    render();
+    status.textContent = bars.length ? bars.length + (bars.length === 1 ? " chord recorded." : " chords recorded.") : "No chords recorded.";
   }
 
   function onMidi(event) {
@@ -197,7 +301,8 @@ function setupMidiRecorder({ pitchNames, suggest, audition }) {
 
   clear.addEventListener("click", () => {
     if (recording) stopRecording();
-    chords = [];
+    bars = [];
+    selectedBar = 0;
     save();
     render();
     status.textContent = "Recording cleared.";
