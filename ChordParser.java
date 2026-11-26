@@ -1,23 +1,24 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChordParser {
+    private static final Pattern SYMBOL = Pattern.compile("([A-G][b#]?)(.*)");
 
-    public List<Chord> parse(String chordsInput){
+    public List<Chord> parse(String chordsInput) {
+        String input = chordsInput.strip();
+        if (input.isEmpty()) {
+            throw new IllegalArgumentException("Enter at least one chord.");
+        }
+
         List<Chord> chords = new ArrayList<>();
-        String[] individualChords = chordsInput.split(" ");
-        for (String individualChord : individualChords) {
-            String root1Chars = individualChord.substring(0, 1);
-            String suffixRoot1Chars = individualChord.substring(1);
-            if (individualChord.length() > 1 && (individualChord.charAt(1) == 'b' ||
-                    individualChord.charAt(1) == '#')) {
-                String root2Chars = individualChord.substring(0, 2);
-                String suffixRoot2Chars = individualChord.substring(2);
-                chords.add(new Chord(root2Chars, suffixRoot2Chars));
+        for (String symbol : input.split("\\s*(?:→|->)\\s*|\\s+", -1)) {
+            Matcher match = SYMBOL.matcher(symbol);
+            if (!match.matches()) {
+                throw new IllegalArgumentException("Invalid chord symbol: \"" + symbol + "\".");
             }
-            else {
-                chords.add(new Chord(root1Chars, suffixRoot1Chars));
-            }
+            chords.add(new Chord(match.group(1), match.group(2)));
         }
         return chords;
     }

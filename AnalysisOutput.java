@@ -2,34 +2,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnalysisOutput {
+    public void analyze(String input) {
+        analyze(input, "C");
+    }
 
-    public void analyze(String input){
+    public void analyze(String input, String tonic) {
         ChordParser parser = new ChordParser();
         List<Chord> chords = parser.parse(input);
-        RomanNumeralMapper mapper = new RomanNumeralMapper();
+        RomanNumeralMapper mapper = new RomanNumeralMapper(tonic);
         List<String> romanNumerals = new ArrayList<>();
 
-        // print list of chords
-        System.out.print("Chords: ");
-        for (Chord newChord : chords) {
-            romanNumerals.add(mapper.map(newChord));
-            System.out.print(newChord + " ");
+        System.out.print("Chords:");
+        for (Chord chord : chords) {
+            romanNumerals.add(mapper.map(chord));
+            System.out.print(" " + chord);
         }
         System.out.println();
-
-        // print list of roman numerals
-        System.out.print("Roman numerals: ");
-        for (String newRomanNumeral : romanNumerals){
-            System.out.print(newRomanNumeral + " ");
-        }
-        System.out.println();
+        System.out.println("Roman numerals: " + String.join(" ", romanNumerals));
 
         PatternDetector detector = new PatternDetector();
-        List<Integer> positions = detector.detect(romanNumerals);
-
-        // print positions of pattern
-        for (Integer newPosition : positions){
-            System.out.println("ii-V-I detected at position " + newPosition);
+        for (int position : detector.detect(romanNumerals, chords)) {
+            System.out.println("ii-V-I detected at position " + position);
         }
         System.out.println();
     }

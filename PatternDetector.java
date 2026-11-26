@@ -1,18 +1,32 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 public class PatternDetector {
-
     public List<Integer> detect(List<String> romanNumerals) {
-        List<Integer> storePositions = new ArrayList<>();
-        for (int i = 0; i <= romanNumerals.size() - 3; i++){
-            if ((romanNumerals.get(i).equals("ii")) &&
-                    (romanNumerals.get(i+1).equals("V"))
-                    && (romanNumerals.get(i+2).equals("I"))){
-                storePositions.add(i);
+        return detect(romanNumerals, position -> true);
+    }
+
+    List<Integer> detect(List<String> romanNumerals, List<Chord> chords) {
+        return detect(romanNumerals, position -> {
+            Chord dominant = chords.get(position + 1);
+            Chord tonic = chords.get(position + 2);
+            return (dominant.isMajorTriad() || dominant.quality() == Chord.Quality.DOMINANT)
+                    && tonic.quality() == Chord.Quality.MAJOR;
+        });
+    }
+
+    private List<Integer> detect(List<String> romanNumerals, IntPredicate hasCadenceQuality) {
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i <= romanNumerals.size() - 3; i++) {
+            if ("ii".equals(romanNumerals.get(i))
+                    && "V".equals(romanNumerals.get(i + 1))
+                    && "I".equals(romanNumerals.get(i + 2))
+                    && hasCadenceQuality.test(i)) {
+                positions.add(i);
             }
         }
-        return storePositions;
+        return positions;
     }
 
     public static void main(String[] args) {
