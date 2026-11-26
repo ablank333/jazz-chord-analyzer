@@ -46,9 +46,9 @@ iiø-V-i detected at position 0
 
 The analyzer uses one key for the whole progression. Minor-key numerals use the natural minor scale for degree labels, so G#dim7 in A minor is `#vii°`. Both cadence types accept a major triad or dominant chord on V. The minor cadence requires a half-diminished ii and a minor tonic.
 
-## Jazz Lead Sheet web app
+## Turnaround web app
 
-Explore preset jazz charts, hear sampled grand piano voicings, and capture chords from a MIDI keyboard. The **Next chord** section suggests continuations using the selected key and recent recorded chords. Each suggestion includes its harmonic reason and a piano preview.
+Turnaround lets you explore preset jazz charts, hear sampled grand piano voicings, and capture chords from a MIDI keyboard. The **Next chord** section suggests continuations using the selected key and recent recorded chords. Each suggestion includes its harmonic reason and a piano preview.
 
 Run the web app locally from the repository root with `python3 -m http.server --directory web/dist`, then open `http://localhost:8000`. To regenerate charts from the Python analyzer, run `python3 -m web.build_charts`.
 

@@ -198,14 +198,9 @@ function loadChart() {
   const key = keySelect.selection();
   kindSelect.refresh("cadence");
   const kind = kindSelect.selection();
-  const cadenceLabel = cadenceName();
   currentChart = globalThis.CHARTS[key.value][kind.value];
   document.querySelector("#chart-title").textContent = kind.label;
   document.querySelector("#chart-key").textContent = key.label;
-  document.querySelector("#cadences").textContent = currentChart.cadences.length
-    ? cadenceLabel + " · " + (currentChart.cadences.length === 1 ? "bar " : "bars ") +
-      currentChart.cadences.map(position => position + 1).join(", ")
-    : "";
   buttons = currentChart.bars.map((bar, index) => {
     const button = document.createElement("button");
     const number = document.createElement("span");
