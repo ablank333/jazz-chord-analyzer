@@ -2,6 +2,10 @@
 
 A Python command-line tool that labels chord progressions with Roman numerals in a supplied key. It detects ii–V–I in major keys and iiø–V–i in minor keys.
 
+## Project rule
+
+AI tools may assist with writing and reviewing the code. The application must run locally and use deterministic music-theory rules for all analysis. AI models, machine learning, and AI services are excluded from the application, including future features such as key suggestions.
+
 ## Run
 
 From the repository root with Python 3.9 or later, run:
